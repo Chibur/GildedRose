@@ -7,109 +7,100 @@ namespace GildedRose.Console
         IList<Item> Items;
         static void Main(string[] args)
         {
-            System.Console.WriteLine("OMGHAI!");
+            System.Console.WriteLine("OMGHAI! \n");
 
             var app = new Program()
-                          {
-                              Items = new List<Item>
-                                          {
-                                              new Item {Name = "+5 Dexterity Vest", SellIn = 10, Quality = 20},
-                                              new Item {Name = "Aged Brie", SellIn = 2, Quality = 0},
-                                              new Item {Name = "Elixir of the Mongoose", SellIn = 5, Quality = 7},
-                                              new Item {Name = "Sulfuras, Hand of Ragnaros", SellIn = 0, Quality = 80},
-                                              new Item
-                                                  {
-                                                      Name = "Backstage passes to a TAFKAL80ETC concert",
-                                                      SellIn = 15,
-                                                      Quality = 20
-                                                  },
-                                              new Item {Name = "Conjured Mana Cake", SellIn = 3, Quality = 6}
-                                          }
+            {
+                Items = new List<Item>
+                                        {
+                                            new Item {Name = "+5 Dexterity Vest", SellIn = 10, Quality = 20},
+                                            new Item {Name = "Aged Brie", SellIn = 2, Quality = 0},
+                                            new Item {Name = "Elixir of the Mongoose", SellIn = 5, Quality = 7},
+                                            new Item {Name = "Sulfuras, Hand of Ragnaros", SellIn = 0, Quality = 80},
+                                            new Item
+                                                {
+                                                    Name = "Backstage passes to a TAFKAL80ETC concert",
+                                                    SellIn = 15,
+                                                    Quality = 20
+                                                },
+                                            new Item {Name = "Conjured Mana Cake", SellIn = 3, Quality = 6}
+                                        }
 
-                          };
+            };
+            int amountOfDays = 11; // time period
+            for (int i = 0; i < amountOfDays; i++)
+                app.UpdateQuality();
 
-            app.UpdateQuality();
-
+            System.Console.WriteLine("After " + amountOfDays + " days quality of items is:");
+            foreach (Item item in app.Items)
+            {
+                 System.Console.WriteLine(item.Name + ": "+ item.Quality);
+            }
+                
+            
             System.Console.ReadKey();
 
         }
 
         public void UpdateQuality()
         {
-            for (var i = 0; i < Items.Count; i++)
+            foreach (Item item in Items)
             {
-                if (Items[i].Name != "Aged Brie" && Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
+                if (item.Name != "Sulfuras, Hand of Ragnaros") // decide if do anything
                 {
-                    if (Items[i].Quality > 0)
+                    if (item.Name == "Aged Brie" || item.Name == "Backstage passes to a TAFKAL80ETC concert") // decide if increment or decrement (increment)
                     {
-                        if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
+                        var incrementQualityBy = 1;
+                        if (item.Name == "Aged Brie" && item.Quality < 50)  // check if aged brie does not excide 50 
                         {
-                            Items[i].Quality = Items[i].Quality - 1;
+                            item.Quality += incrementQualityBy;
                         }
-                    }
-                }
-                else
-                {
-                    if (Items[i].Quality < 50)
-                    {
-                        Items[i].Quality = Items[i].Quality + 1;
-
-                        if (Items[i].Name == "Backstage passes to a TAFKAL80ETC concert")
+                        if (item.Name == "Backstage passes to a TAFKAL80ETC concert") // check if backstage
                         {
-                            if (Items[i].SellIn < 11)
+                            if (item.SellIn < 0) // set quality to 0 if item expires
                             {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
+                                item.Quality = 0;
                             }
-
-                            if (Items[i].SellIn < 6)
+                            else
                             {
-                                if (Items[i].Quality < 50)
+                                if (item.SellIn <= 10 && item.SellIn > 5) // change increment value to 2
                                 {
-                                    Items[i].Quality = Items[i].Quality + 1;
+                                    incrementQualityBy = 2;
                                 }
+                                else if (item.SellIn <= 5) // change increment value to 3
+                                {
+                                    incrementQualityBy = 3;
+                                }
+                                if (item.Quality + incrementQualityBy >= 50) // in order not to excide 50
+                                {
+                                    incrementQualityBy = 50 - item.Quality;
+                                }
+                                item.Quality += incrementQualityBy;
                             }
                         }
                     }
-                }
-
-                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                {
-                    Items[i].SellIn = Items[i].SellIn - 1;
-                }
-
-                if (Items[i].SellIn < 0)
-                {
-                    if (Items[i].Name != "Aged Brie")
+                    else //decrement
                     {
-                        if (Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
+                        var decrementQualityBy = 1;
+                        if (item.SellIn < 0) // check if item not expired
                         {
-                            if (Items[i].Quality > 0)
-                            {
-                                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                                {
-                                    Items[i].Quality = Items[i].Quality - 1;
-                                }
-                            }
+                            decrementQualityBy *= 2;
                         }
-                        else
+                        if (item.Name.Contains("Conjured")) // Many items can be conjured so check if item is not conjured 
                         {
-                            Items[i].Quality = Items[i].Quality - Items[i].Quality;
+                            decrementQualityBy *= 2;
                         }
+                        if (item.Quality - decrementQualityBy < 0) // check if following number won't excide 0 if so decrement by quality
+                        {
+                            decrementQualityBy = item.Quality;
+                        }
+                        item.Quality -= decrementQualityBy;
                     }
-                    else
-                    {
-                        if (Items[i].Quality < 50)
-                        {
-                            Items[i].Quality = Items[i].Quality + 1;
-                        }
-                    }
+                    item.SellIn--;
                 }
             }
-        }
 
+        }
     }
 
     public class Item
